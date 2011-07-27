@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 import matplotlib
-matplotlib.use('GTKCairo')
+matplotlib.use('MacOSX')
 import numpy as np
 import pylab as pl
 import matplotlib.pyplot as plt
