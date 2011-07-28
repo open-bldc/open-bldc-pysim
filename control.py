@@ -11,7 +11,7 @@ PWM_freq = 1000
 #
 def run(Sp, Y, t):
 
-    elec_angle = Y[ov_theta]*dm.NbPoles/3 
+    elec_angle = norm_angle(Y[ov_theta]*dm.NbPoles/3) 
     
 
     U = np.zeros(dm.iv_size)
