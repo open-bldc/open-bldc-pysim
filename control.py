@@ -4,6 +4,8 @@ import dyn_model  as dm
 
 import misc_utils as mu
 
+import math
+
 PWM_freq = 8000
 
 
@@ -13,8 +15,91 @@ PWM_freq = 8000
 #
 def run(Sp, Y, t):
 
-    elec_angle = mu.norm_angle(Y[dm.ov_theta]*dm.NbPoles/3) 
-    
+    elec_angle = mu.norm_angle(Y[dm.ov_theta] * dm.NbPoles/2)
 
     U = np.zeros(dm.iv_size)
+
+    # switching pattern based on the "encoder"
+    # H PWM L ON pattern
+    # 100% duty cycle for now needs to be variable and stuff ^^
+    #if (elec_angle > 0) and (elec_angle <= (math.pi * (1/6))): # second half of step 1
+    if 0.0 < elec_angle <= (math.pi * (1.0/6.0)): # second half of step 1
+        # U off
+        # V low
+        # W hpwm (100% duty for now)
+        U[dm.iv_hu] = 0
+        U[dm.iv_lu] = 0
+        U[dm.iv_hv] = 0
+        U[dm.iv_lv] = 1
+        U[dm.iv_hw] = 1
+        U[dm.iv_lw] = 0
+        print 'step 1b {} {}'.format(mu.deg_of_rad(elec_angle), U)
+    #elif (elec_angle > (math.pi * (1/6.0))) and (elec_angle <= (math.pi * (3/6.0))): # step 2
+    elif (math.pi * (1.0/6.0)) < elec_angle <= (math.pi * (3.0/6.0)): # step 2
+        # U hpwm
+        # V low
+        # W off
+        U[dm.iv_hu] = 1
+        U[dm.iv_lu] = 0
+        U[dm.iv_hv] = 0
+        U[dm.iv_lv] = 1
+        U[dm.iv_hw] = 0
+        U[dm.iv_lw] = 0
+        print 'step 2  {} {}'.format(mu.deg_of_rad(elec_angle), U)
+    elif (math.pi * (3.0/6.0)) < elec_angle <= (math.pi * (5.0/6.0)): # step 3
+        # U hpwm
+        # V off
+        # W low
+        U[dm.iv_hu] = 1
+        U[dm.iv_lu] = 0
+        U[dm.iv_hv] = 0
+        U[dm.iv_lv] = 0
+        U[dm.iv_hw] = 0
+        U[dm.iv_lw] = 1
+        print 'step 3  {} {}'.format(mu.deg_of_rad(elec_angle), U)
+    elif (math.pi * (5.0/6.0)) < elec_angle <= (math.pi * (7.0/6.0)): # step 4
+        # U off
+        # V hpwm
+        # W low
+        U[dm.iv_hu] = 0
+        U[dm.iv_lu] = 0
+        U[dm.iv_hv] = 1
+        U[dm.iv_lv] = 0
+        U[dm.iv_hw] = 0
+        U[dm.iv_lw] = 1
+        print 'step 4  {} {}'.format(mu.deg_of_rad(elec_angle), U)
+    elif (math.pi * (7.0/6.0)) < elec_angle <= (math.pi * (9.0/6.0)): # step 5
+        # U low
+        # V hpwm
+        # W off
+        U[dm.iv_hu] = 0
+        U[dm.iv_lu] = 1
+        U[dm.iv_hv] = 1
+        U[dm.iv_lv] = 0
+        U[dm.iv_hw] = 0
+        U[dm.iv_lw] = 0
+        print 'step 5  {} {}'.format(mu.deg_of_rad(elec_angle), U)
+    elif (math.pi * (9.0/6.0)) < elec_angle <= (math.pi * (11.0/6.0)): # step 6
+        # U low
+        # V off
+        # W hpwm
+        U[dm.iv_hu] = 0
+        U[dm.iv_lu] = 1
+        U[dm.iv_hv] = 0
+        U[dm.iv_lv] = 0
+        U[dm.iv_hw] = 1
+        U[dm.iv_lw] = 0
+        print 'step 6  {} {}'.format(mu.deg_of_rad(elec_angle), U)
+    elif (math.pi * (11.0/6.0)) < elec_angle <= (math.pi * (12.0/6.0)): # first half of step 1
+        # U off
+        # V low
+        # W hpwm
+        U[dm.iv_hu] = 0
+        U[dm.iv_lu] = 0
+        U[dm.iv_hv] = 0
+        U[dm.iv_lv] = 1
+        U[dm.iv_hw] = 1
+        U[dm.iv_lw] = 0
+        print 'step 1a {} {}'.format(mu.deg_of_rad(elec_angle), U)
+
     return U
