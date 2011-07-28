@@ -104,11 +104,33 @@ def dyn(X, t, U, W):
         vwi = -VDC/2
 
     # Mean voltage in the motor, assuming star configuration
+    vtotal = ((vui + vvi + vwi) - (eu + ev + ew))
     vm = 0
 
-    iu_dot = (1/L) * (vui - (R * X[sv_iu]) - eu - vm)
-    iv_dot = (1/L) * (vvi - (R * X[sv_iv]) - ev - vm)
-    iw_dot = (1/L) * (vwi - (R * X[sv_iw]) - ew - vm)
+    if X[sv_iu] == 0:   # phase V & W are conducting current
+        vm = vtotal / 2
+        vu = eu
+        vv = vvi - vm
+        vw = vwi - vm
+    elif X[sv_iv] == 0: # phase U & W are conducting current
+        vm = vtotal / 2
+        vu = vui - vm
+        vv = ev
+        vw = vwi - vm
+    elif X[sv_iw] == 0: # phase U & V are conducting current
+        vm = vtotal / 2
+        vu = vui - vm
+        vv = vvi - vm
+        vw = ew
+    else:               # all phases are corducting current
+        vm = vtotal / 3
+        vu = vui - vm
+        vv = vvi - vm
+        vw = vwi - vm
+
+    iu_dot = (1/L) * (vu - (R * X[sv_iu]) - eu - vm)
+    iv_dot = (1/L) * (vv - (R * X[sv_iv]) - ev - vm)
+    iw_dot = (1/L) * (vw - (R * X[sv_iw]) - ew - vm)
 
     Xd = [  X[sv_omega],
             omega_dot,
