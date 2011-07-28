@@ -51,19 +51,19 @@ ov_size    = 4
 def backemf(X,thetae_offset):
     thetae = mu.norm_angle(X[sv_theta] * (NbPoles / 2))
     phase_thetae = thetae + thetae_offset
-    bemf_constant = (Kv * math.pi)/30 # aka. ke in V/rad/s
+    bemf_constant = (Kv * math.pi)/30.0 # aka. ke in V/rad/s
     max_bemf = bemf_constant * X[sv_omega]
     bemf = 0
-    if (thetae > 0) and (thetae <= (math.pi/6)):
-        bemf = (max_bemf / (math.pi/6)) * thetae
-    elif (thetae > (math.pi/6)) and (thetae <= (math.pi * (5/6))):
+    if 0.0 < thetae <= (math.pi * (1.0/6.0)):
+        bemf = (max_bemf / (math.pi * (1.0/6.0))) * thetae
+    elif (math.pi/6.0) <thetae <= (math.pi * (5.0/6.0)):
         bemf = max_bemf
-    elif (thetae > (math.pi * (5/6))) and (thetae <= (math.pi * (7/6))):
-        bemf = -((max_bemf/(math.pi/6))* (thetae - math.pi))
-    elif (thetae > (math.pi * (7/6))) and (thetae <= (math.pi * (11/6))):
+    elif (math.pi * (5.0/6.0)) < thetae <= (math.pi * (7.0/6.0)):
+        bemf = -((max_bemf/(math.pi/6.0))* (thetae - math.pi))
+    elif (math.pi * (7.0/6.0)) < thetae <= (math.pi * (11.0/6.0)):
         bemf = -max_bemf
-    elif (thetae > (math.pi * (11/6))) and (thetae <= (2 * math.pi)):
-        bemf = (max_bemf/(math.pi/6)) * (thetae - (2 * math.pi))
+    elif (math.pi * (11.0/6.0)) < thetae <= (2.0 * math.pi):
+        bemf = (max_bemf/(math.pi/6.0)) * (thetae - (2.0 * math.pi))
 
     return bemf
 
