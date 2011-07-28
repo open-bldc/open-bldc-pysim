@@ -2,7 +2,9 @@ import numpy as np
 
 import dyn_model  as dm
 
-PWM_freq = 1000
+import misc_utils as mu
+
+PWM_freq = 8000
 
 
 #
@@ -11,7 +13,7 @@ PWM_freq = 1000
 #
 def run(Sp, Y, t):
 
-    elec_angle = norm_angle(Y[ov_theta]*dm.NbPoles/3) 
+    elec_angle = mu.norm_angle(Y[dm.ov_theta]*dm.NbPoles/3) 
     
 
     U = np.zeros(dm.iv_size)

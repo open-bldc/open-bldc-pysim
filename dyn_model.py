@@ -1,6 +1,7 @@
 #-*- coding: utf-8 -*-
 import numpy as np
 import math
+import misc_utils as mu
 
 # parameters
 Inertia = 1    # aka. 'J'
@@ -9,7 +10,7 @@ Kv = 1700      # aka. RPM/V
 L = 3          # aka. Coil inductance in H
 R = 0.02       # aka. Phase resistence in Ohm
 VDC = 100      # aka. Supply voltage
-NbPoles = 12   # 
+NbPoles = 14   # NbPoles / 2 = Number of pole pairs (you count the permanent magnets on the rotor to get NbPoles)
 
 # Components of the state vector
 sv_theta  = 0      # angle of the rotor
@@ -47,21 +48,22 @@ ov_size    = 4
 #
 # Used to calculate the phase backemf aka. 'e'
 #
-def backemf(X,omega_offset):
-    omega = X[sv_omega] + omega_offset
+def backemf(X,thetae_offset):
+    thetae = mu.norm_angle(X[sv_theta] * (NbPoles / 2))
+    phase_thetae = thetae + thetae_offset
     bemf_constant = (Kv * math.pi)/30 # aka. ke in V/rad/s
     max_bemf = bemf_constant * X[sv_omega]
     bemf = 0
-    if (omega > 0) and (omega <= (math.pi/6)):
-        bemf = (max_bemf / (math.pi/6)) * omega
-    elif (omega > (math.pi/6)) and (omega <= (math.pi * (5/6))):
+    if (thetae > 0) and (thetae <= (math.pi/6)):
+        bemf = (max_bemf / (math.pi/6)) * thetae
+    elif (thetae > (math.pi/6)) and (thetae <= (math.pi * (5/6))):
         bemf = max_bemf
-    elif (omega > (math.pi * (5/6))) and (omega <= (math.pi * (7/6))):
-        bemf = -((max_bemf/(math.pi/6))* (omega - math.pi))
-    elif (omega > (math.pi * (7/6))) and (omega <= (math.pi * (11/6))):
+    elif (thetae > (math.pi * (5/6))) and (thetae <= (math.pi * (7/6))):
+        bemf = -((max_bemf/(math.pi/6))* (thetae - math.pi))
+    elif (thetae > (math.pi * (7/6))) and (thetae <= (math.pi * (11/6))):
         bemf = -max_bemf
-    elif (omega > (math.pi * (11/6))) and (omega <= (2 * math.pi)):
-        bemf = (max_bemf/(math.pi/6)) * (omega - (2 * math.pi))
+    elif (thetae > (math.pi * (11/6))) and (thetae <= (2 * math.pi)):
+        bemf = (max_bemf/(math.pi/6)) * (thetae - (2 * math.pi))
 
     return bemf
 
