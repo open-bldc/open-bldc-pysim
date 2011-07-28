@@ -14,13 +14,18 @@ import control    as ctl
 
 
 def display_state(time, X):
-    ax = plt.subplot(2,1,1)
-    plt.plot(time,mu.deg_of_rad(X[:,dm.sv_theta]), 'r', linewidth=3.0)
-    plt.title('$\\alpha$')
-    ax = plt.subplot(2,1,2)
-    plt.plot(time,mu.deg_of_rad(X[:,dm.sv_omega]), 'r', linewidth=3.0)
-    plt.title('$\dot{\\alpha}$')
+    
+    titles = ['$\\theta$', '$\omega$', '$i_u$', '$i_v$', '$i_w$']
+    for i in range(0, 2):
+        plt.subplot(dm.sv_size,1,i+1)
+        plt.plot(time,mu.deg_of_rad(X[:,i]), 'r', linewidth=3.0)
+        plt.title(titles[i])
+    for i in range(2, dm.sv_size):
+        plt.subplot(dm.sv_size,1,i+1)
+        plt.plot(time, X[:,i], 'r', linewidth=3.0)
+        plt.title(titles[i])
     pl.show()
+
 
 def main():
 
