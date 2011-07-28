@@ -23,7 +23,7 @@ def run(Sp, Y, t):
     # H PWM L ON pattern
     # 100% duty cycle for now needs to be variable and stuff ^^
     #if (elec_angle > 0) and (elec_angle <= (math.pi * (1/6))): # second half of step 1
-    if 0.0 < elec_angle <= (math.pi * (1.0/6.0)): # second half of step 1
+    if 0. <= elec_angle <= (math.pi * (1./6.)): # second half of step 1
         # U off
         # V low
         # W hpwm (100% duty for now)
@@ -101,5 +101,7 @@ def run(Sp, Y, t):
         U[dm.iv_hw] = 1
         U[dm.iv_lw] = 0
         print 'step 1a {} {}'.format(mu.deg_of_rad(elec_angle), U)
+    else:
+        print 'ERROR: The electrical angle is out of range!!!'
 
     return U
