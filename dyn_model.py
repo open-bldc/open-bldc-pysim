@@ -4,13 +4,13 @@ import math
 import misc_utils as mu
 
 # parameters
-Inertia = 1    # aka. 'J'
-Damping = 0.25 # aka. 'B'
-Kv = 1700.     # aka. RPM/V
-L = 3.         # aka. Coil inductance in H
-R = 0.02       # aka. Phase resistence in Ohm
-VDC = 100.     # aka. Supply voltage
-NbPoles = 14.  # NbPoles / 2 = Number of pole pairs (you count the permanent magnets on the rotor to get NbPoles)
+Inertia = 0.0022 # aka. 'J' in kg/(m^2)
+Damping = 0.001  # aka. 'B' in Nm/(rad/s)
+Kv = 1700.       # aka. motor constant in RPM/V
+L = 0.00312      # aka. Coil inductance in H
+R = 0.8          # aka. Phase resistence in Ohm
+VDC = 100.      # aka. Supply voltage
+NbPoles = 14.    # NbPoles / 2 = Number of pole pairs (you count the permanent magnets on the rotor to get NbPoles)
 
 # Components of the state vector
 sv_theta  = 0      # angle of the rotor
@@ -49,21 +49,24 @@ ov_size    = 4
 # Used to calculate the phase backemf aka. 'e'
 #
 def backemf(X,thetae_offset):
-    thetae = mu.norm_angle(X[sv_theta] * (NbPoles / 2.))
-    phase_thetae = thetae + thetae_offset
+    phase_thetae = mu.norm_angle((X[sv_theta] * (NbPoles / 2.)) + thetae_offset)
+
     bemf_constant = (Kv * math.pi)/30. # aka. ke in V/rad/s
     max_bemf = bemf_constant * X[sv_omega]
+
     bemf = 0.
-    if 0. <= thetae <= (math.pi * (1./6.)):
-        bemf = (max_bemf / (math.pi * (1./6.))) * thetae
-    elif (math.pi/6.) <thetae <= (math.pi * (5./6.)):
+    if 0. <= phase_thetae <= (math.pi * (1./6.)):
+        bemf = (max_bemf / (math.pi * (1./6.))) * phase_thetae
+    elif (math.pi/6.) < phase_thetae <= (math.pi * (5./6.)):
         bemf = max_bemf
-    elif (math.pi * (5./6.)) < thetae <= (math.pi * (7./6.)):
-        bemf = -((max_bemf/(math.pi/6.))* (thetae - math.pi))
-    elif (math.pi * (7./6.)) < thetae <= (math.pi * (11./6.)):
+    elif (math.pi * (5./6.)) < phase_thetae <= (math.pi * (7./6.)):
+        bemf = -((max_bemf/(math.pi/6.))* (phase_thetae - math.pi))
+    elif (math.pi * (7./6.)) < phase_thetae <= (math.pi * (11./6.)):
         bemf = -max_bemf
-    elif (math.pi * (11./6.)) < thetae <= (2.0 * math.pi):
-        bemf = (max_bemf/(math.pi/6.)) * (thetae - (2. * math.pi))
+    elif (math.pi * (11./6.)) < phase_thetae <= (2.0 * math.pi):
+        bemf = (max_bemf/(math.pi/6.)) * (phase_thetae - (2. * math.pi))
+    else:
+        print "ERROR: angle out of bounds can not calculate bemf {}".format(phase_thetae)
 
     return bemf
 
@@ -79,10 +82,10 @@ def dyn(X, t, U, W):
     ew = backemf(X, math.pi * (4./3.))
 
     # Electromagnetic torque
-    torque = (eu * X[sv_iu] + ev * X[sv_iv] + ew * X[sv_iw])/X[sv_omega]
+    etorque = (eu * X[sv_iu] + ev * X[sv_iv] + ew * X[sv_iw])/X[sv_omega]
 
     # Acceleration of the rotor
-    omega_dot = 1./Inertia * (torque - Damping * X[sv_omega] - W[pv_torque])
+    omega_dot = ((etorque * (NbPoles / 2)) - (Damping * X[sv_omega]) - W[pv_torque]) / Inertia
 
     # Initialize the imposed
     vui = 0.
