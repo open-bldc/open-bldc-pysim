@@ -47,6 +47,9 @@ def main():
         tmp = integrate.odeint(dm.dyn, X[i-1,:], [time[i-1], time[i]], args=(U[i-1,:], W,))
         X[i,:] = tmp[1,:]
         X[i, dm.sv_theta] = mu.norm_angle( X[i, dm.sv_theta])
+        sim_perc = (((i*1.) / (time.size * 1.) * 100))
+        if (sim_perc % 10) == 0:
+            print "{}%".format(sim_perc)
 
     display_state_and_command(time, X, U)
 
