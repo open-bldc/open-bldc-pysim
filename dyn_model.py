@@ -52,8 +52,8 @@ ov_iw      = 2
 ov_vu      = 3
 ov_vv      = 4
 ov_vw      = 5
-ov_omega   = 6
-ov_theta   = 7
+ov_theta   = 6
+ov_omega   = 7
 ov_size    = 8
 
 # Phases and star vector designators
@@ -99,6 +99,8 @@ def voltages(X, U):
     ev = backemf(X, math.pi * (2./3.))
     ew = backemf(X, math.pi * (4./3.))
 
+    
+    
     # Initialize the imposed terminal voltages
     vui = 0.
     vvi = 0.
@@ -122,11 +124,16 @@ def voltages(X, U):
     vtotal = ((vui + vvi + vwi) - (eu + ev + ew))
     vm = 0.
 
-    if X[sv_iu] == 0:   # phase V & W are conducting current
+#    if math.fabs(X[sv_iu]) < 0.001:   # phase V & W are conducting current
+    if  -0.005 < X[sv_iu] < 0.005:   # phase V & W are conducting current
+#    if X[sv_iu] == 0:   # phase V & W are conducting current
+        print "X[sv_iu] == 0 {}".format(X[sv_iu])
         vm = vtotal / 2.
         vu = eu
         vv = vvi - vm
         vw = vwi - vm
+#        vv = VDC/2. - eu/2.
+#        vw = -VDC/2. + eu/2.
     elif X[sv_iv] == 0: # phase U & W are conducting current
         vm = vtotal / 2.
         vu = vui - vm
@@ -138,10 +145,13 @@ def voltages(X, U):
         vv = vvi - vm
         vw = ew
     else:               # all phases are corducting current
+        print "none == 0"
         vm = vtotal / 3.
         vu = vui - vm
         vv = vvi - vm
         vw = vwi - vm
+
+#    print "{} : {} {} {}".format(X[sv_omega], vu, vv, vw )
 
     V = [ vu,
           vv,
@@ -193,6 +203,6 @@ def output(X, U):
 
     Y = [X[sv_iu], X[sv_iv], X[sv_iw],
          V[ph_U], V[ph_V], V[ph_W],
-         X[sv_omega], X[sv_theta]]
+         X[sv_theta], X[sv_omega]]
 
     return Y

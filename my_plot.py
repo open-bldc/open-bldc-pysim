@@ -17,8 +17,13 @@ def plot_output(time, Y, ls):
     plt.plot(time,Y[:,dm.ov_vw], ls, linewidth=1.5)
     plt.legend(['$v_u$', '$v_v$', '$v_w$'], loc='upper right')
     plt.title('Phase voltage')
- 
+    plt.subplot(4, 1, 3)
+    plt.plot(time,mu.deg_of_rad(Y[:,dm.ov_theta]), ls, linewidth=1.5)
+#    plt.plot(time, Y[:,dm.ov_theta], ls, linewidth=1.5)
+    plt.title('Angular position')
     plt.subplot(4, 1, 4)
-    plt.plot(time,mu.rpm_of_radps(Y[:,dm.ov_omega]), ls, linewidth=1.5)
+#    plt.plot(time,mu.rpm_of_radps(Y[:,dm.ov_omega]), ls, linewidth=1.5)
+    plt.plot(time,mu.deg_of_rad(Y[:,dm.ov_omega]), ls, linewidth=1.5)
+#    plt.plot(time, Y[:,dm.ov_omega], ls, linewidth=1.5)
     plt.title('Rotational Velocity')
        

@@ -14,6 +14,7 @@ import control    as ctl
 import my_io      as mio
 import my_plot    as mp
 
+            
 
 def display_state_and_command(time, X, U):
 
@@ -35,19 +36,23 @@ def display_state_and_command(time, X, U):
 
 
 def main():
-    t_psim, Y_psim =  mio.read_csv('bldc_startup_psim_1us_resolution.csv')
-    mp.plot_output(t_psim, Y_psim, '.')
+#    t_psim, Y_psim =  mio.read_csv('bldc_startup_psim_1us_resolution.csv')
+#    mp.plot_output(t_psim, Y_psim, '.')
     
-    freq_sim = 1e4
-    time = pl.arange(0.0, 0.006, 1./freq_sim)
+    freq_sim = 1e6
+    time = pl.arange(0.0, 0.00007, 1./freq_sim)
     X = np.zeros((time.size, dm.sv_size))
     Y = np.zeros((time.size, dm.ov_size))
     U = np.zeros((time.size, dm.iv_size))
-    X0 = [0, mu.rad_of_deg(300), 0, 0, 0]
+    X0 = [0, mu.rad_of_deg(0.1), 0, 0, 0]
     X[0,:] = X0
     W = [0]
     for i in range(1,time.size):
-        Y[i-1,:] = dm.output(X[i-1,:], U[i-1,:])
+        if i==1:
+            Uim2 = [0,0,0,0,0,0]
+        else:
+            Uim2 = Y[i-2,:]
+        Y[i-1,:] = dm.output(X[i-1,:], U[i-2,:])
         U[i-1,:] = ctl.run(0, Y[i-1,:], time[i-1])
         tmp = integrate.odeint(dm.dyn, X[i-1,:], [time[i-1], time[i]], args=(U[i-1,:], W,))
         X[i,:] = tmp[1,:]
@@ -55,10 +60,14 @@ def main():
         sim_perc = (((i*1.) / (time.size * 1.) * 100))
         if (sim_perc % 1) == 0:
             print "{}%".format(sim_perc)
+    Y[-1,:] = Y[-2,:]
+    U[-1,:] = U[-2,:]
+        
 
     mp.plot_output(time, Y, '-')
-    pl.show()
-#    display_state_and_command(time, X, U)
+#    pl.show()
+    plt.figure(figsize=(10.24, 5.12))
+    display_state_and_command(time, X, U)
 
 if __name__ == "__main__":
     main()
