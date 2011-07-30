@@ -40,7 +40,7 @@ def main():
     pl.show()
     import code; code.interact(local=locals())
     freq_sim = 1e4
-    time = pl.arange(0.0, 1., 1./freq_sim)
+    time = pl.arange(0.0, 1.0, 1./freq_sim)
     X = np.zeros((time.size, dm.sv_size))
     Y = np.zeros((time.size, dm.ov_size))
     U = np.zeros((time.size, dm.iv_size))
@@ -48,7 +48,7 @@ def main():
     X[0,:] = X0
     W = [0]
     for i in range(1,time.size):
-        Y[i-1,:] = dm.output(X[i-1,:])
+        Y[i-1,:] = dm.output(X[i-1,:], U[i-1,:])
         U[i-1,:] = ctl.run(0, Y[i-1,:], time[i-1])
         tmp = integrate.odeint(dm.dyn, X[i-1,:], [time[i-1], time[i]], args=(U[i-1,:], W,))
         X[i,:] = tmp[1,:]

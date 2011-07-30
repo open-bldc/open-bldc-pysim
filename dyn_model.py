@@ -46,6 +46,12 @@ ov_omega   = 6
 ov_theta   = 7
 ov_size    = 8
 
+# Phases and star vector designators
+ph_U = 0
+ph_V = 1
+ph_W = 2
+ph_star = 3
+ph_size = 4
 
 #
 # Calculate backemf at a given omega offset from the current rotor position
@@ -75,28 +81,20 @@ def backemf(X,thetae_offset):
     return bemf
 
 #
-# Dynamic model
-#
-# X state, t time, U input, W perturbation
-#
-def dyn(X, t, U, W):
+# Calculate phase voltages
+# Returns a vector of phase voltages in reference to the star point
+def voltages(X, U):
 
     eu = backemf(X, 0.)
     ev = backemf(X, math.pi * (2./3.))
     ew = backemf(X, math.pi * (4./3.))
 
-    # Electromagnetic torque
-    etorque = (eu * X[sv_iu] + ev * X[sv_iv] + ew * X[sv_iw])/X[sv_omega]
-
-    # Acceleration of the rotor
-    omega_dot = ((etorque * (NbPoles / 2)) - (Damping * X[sv_omega]) - W[pv_torque]) / Inertia
-
-    # Initialize the imposed
+    # Initialize the imposed terminal voltages
     vui = 0.
     vvi = 0.
     vwi = 0.
 
-    # Phase voltages
+    # Phase input voltages based on the inverter switches states
     if U[iv_hu] == 1:
         vui = VDC/2.
     if U[iv_lu] == 1:
@@ -135,9 +133,36 @@ def dyn(X, t, U, W):
         vv = vvi - vm
         vw = vwi - vm
 
-    iu_dot = (1./L) * (vu - (R * X[sv_iu]) - eu - vm)
-    iv_dot = (1./L) * (vv - (R * X[sv_iv]) - ev - vm)
-    iw_dot = (1./L) * (vw - (R * X[sv_iw]) - ew - vm)
+    V = [ vu,
+          vv,
+          vw,
+          vm
+          ]
+
+    return V
+
+#
+# Dynamic model
+#
+# X state, t time, U input, W perturbation
+#
+def dyn(X, t, U, W):
+
+    eu = backemf(X, 0.)
+    ev = backemf(X, math.pi * (2./3.))
+    ew = backemf(X, math.pi * (4./3.))
+
+    # Electromagnetic torque
+    etorque = (eu * X[sv_iu] + ev * X[sv_iv] + ew * X[sv_iw])/X[sv_omega]
+
+    # Acceleration of the rotor
+    omega_dot = ((etorque * (NbPoles / 2)) - (Damping * X[sv_omega]) - W[pv_torque]) / Inertia
+
+    V = voltages(X, U)
+
+    iu_dot = (1./L) * (V[ph_U] - (R * X[sv_iu]) - eu - V[ph_star])
+    iv_dot = (1./L) * (V[ph_V] - (R * X[sv_iv]) - ev - V[ph_star])
+    iw_dot = (1./L) * (V[ph_W] - (R * X[sv_iw]) - ew - V[ph_star])
 
     Xd = [  X[sv_omega],
             omega_dot,
@@ -152,7 +177,9 @@ def dyn(X, t, U, W):
 #
 #
 #
-def output(X):
+def output(X, U):
 
-    Y = [0, 0, 0, X[sv_theta]]
+    V = voltages(X, U)
+
+    Y = [0, 0, 0, V[ph_U], V[ph_V], V[ph_W], X[sv_omega], X[sv_theta]]
     return Y
