@@ -36,11 +36,15 @@ pv_torque  = 0
 pv_size = 1
 
 # Components of the output vector
-ov_comp_uv = 0
-ov_comp_vw = 1
-ov_comp_uw = 2
-ov_theta   = 3
-ov_size    = 4
+ov_iu      = 0
+ov_iv      = 1
+ov_iw      = 2
+ov_vu      = 3
+ov_vv      = 4
+ov_vw      = 5
+ov_omega   = 6
+ov_theta   = 7
+ov_size    = 8
 
 
 #
