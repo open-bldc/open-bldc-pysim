@@ -48,7 +48,7 @@ def main():
         X[i,:] = tmp[1,:]
         X[i, dm.sv_theta] = mu.norm_angle( X[i, dm.sv_theta])
         sim_perc = (((i*1.) / (time.size * 1.) * 100))
-        if (sim_perc % 10) == 0:
+        if (sim_perc % 1) == 0:
             print "{}%".format(sim_perc)
 
     display_state_and_command(time, X, U)
