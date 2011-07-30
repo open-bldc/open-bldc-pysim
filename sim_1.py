@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 import matplotlib
-matplotlib.use('MacOSX')
+#matplotlib.use('MacOSX')
 #matplotlib.use('GTKCairo')
 import numpy as np
 import pylab as pl
@@ -11,6 +11,8 @@ from scipy import integrate
 import misc_utils as mu
 import dyn_model  as dm
 import control    as ctl
+import my_io      as mio
+import my_plot    as mp
 
 
 def display_state_and_command(time, X, U):
@@ -33,6 +35,10 @@ def display_state_and_command(time, X, U):
 
 
 def main():
+    t_psim, Y_psim =  mio.read_csv('bldc_startup_psim.csv')
+    mp.plot_output(t_psim, Y_psim)
+    pl.show()
+    import code; code.interact(local=locals())
     freq_sim = 1e4
     time = pl.arange(0.0, 1., 1./freq_sim)
     X = np.zeros((time.size, dm.sv_size))
