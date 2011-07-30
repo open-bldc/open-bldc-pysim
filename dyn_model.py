@@ -4,14 +4,24 @@ import math
 import misc_utils as mu
 
 # parameters
-Inertia = 0.0022 # aka. 'J' in kg/(m^2)
-Damping = 0.001  # aka. 'B' in Nm/(rad/s)
-Kv = 1700.       # aka. motor constant in RPM/V
-L = 0.00312      # aka. Coil inductance in H
-R = 0.8          # aka. Phase resistence in Ohm
-VDC = 100.      # aka. Supply voltage
-NbPoles = 14.    # NbPoles / 2 = Number of pole pairs (you count the permanent magnets on the rotor to get NbPoles)
-
+if 0:
+    Inertia = 0.0022 # aka. 'J' in kg/(m^2)
+    Damping = 0.001  # aka. 'B' in Nm/(rad/s)
+    Kv = 1700.       # aka. motor constant in RPM/V
+    L = 0.00312      # aka. Coil inductance in H
+    R = 0.8          # aka. Phase resistence in Ohm
+    VDC = 100.       # aka. Supply voltage
+    NbPoles = 14.    # NbPoles / 2 = Number of pole pairs (you count the permanent magnets on the rotor to get NbPoles)
+else: #psim
+    Inertia = 0.000006            # aka. 'J' in kg/(m^2)
+    tau_shaft = 0.006
+    Damping = Inertia/tau_shaft   # aka. 'B' in Nm/(rad/s)
+    Kv = 1./32.3*1000             # aka. motor constant in RPM/V
+    L = 0.00207                   # aka. Coil inductance in H
+    R = 11.9                      # aka. Phase resistence in Ohm
+    VDC = 300.                    # aka. Supply voltage
+    NbPoles = 4.                  # 
+    
 # Components of the state vector
 sv_theta  = 0      # angle of the rotor
 sv_omega = 1       # angular speed of the rotor
@@ -181,5 +191,8 @@ def output(X, U):
 
     V = voltages(X, U)
 
-    Y = [0, 0, 0, V[ph_U], V[ph_V], V[ph_W], X[sv_omega], X[sv_theta]]
+    Y = [X[sv_iu], X[sv_iv], X[sv_iw],
+         V[ph_U], V[ph_V], V[ph_W],
+         X[sv_omega], X[sv_theta]]
+
     return Y

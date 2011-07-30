@@ -35,12 +35,11 @@ def display_state_and_command(time, X, U):
 
 
 def main():
-    t_psim, Y_psim =  mio.read_csv('bldc_startup_psim.csv')
-    mp.plot_output(t_psim, Y_psim)
-    pl.show()
-    import code; code.interact(local=locals())
+    t_psim, Y_psim =  mio.read_csv('bldc_startup_psim_1us_resolution.csv')
+    mp.plot_output(t_psim, Y_psim, '.')
+    
     freq_sim = 1e4
-    time = pl.arange(0.0, 1.0, 1./freq_sim)
+    time = pl.arange(0.0, 0.006, 1./freq_sim)
     X = np.zeros((time.size, dm.sv_size))
     Y = np.zeros((time.size, dm.ov_size))
     U = np.zeros((time.size, dm.iv_size))
@@ -57,7 +56,9 @@ def main():
         if (sim_perc % 1) == 0:
             print "{}%".format(sim_perc)
 
-    display_state_and_command(time, X, U)
+    mp.plot_output(time, Y, '-')
+    pl.show()
+#    display_state_and_command(time, X, U)
 
 if __name__ == "__main__":
     main()

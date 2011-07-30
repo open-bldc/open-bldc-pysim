@@ -8,7 +8,7 @@ import math
 
 PWM_freq = 8000
 PWM_cycle_time = (1./8000)
-PWM_duty = 0.5
+PWM_duty = 1.
 PWM_duty_time = PWM_cycle_time * PWM_duty
 
 debug = False
