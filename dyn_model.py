@@ -239,19 +239,15 @@ def voltages(X, U):
         vm = (vv + vw - ev - ew) / 2.
         vu = eu + vm
 
-    # Initialize the imposed terminal voltages
+
+#    # Initialize the imposed terminal voltages
 #    vui = 0.
 #    vvi = 0.
 #    vwi = 0.
-
-    # Phase input voltages based on the inverter switches states
-#    if pux:
-#        if (U[iv_hv] == 1) or (U[iv_dhv] == 1):
-#            vui = VDC/2.
-#        else:
-#            vui = -VDC/2.
-#    else:
-#        vui = ev
+#
+#    # Phase input voltages based on the inverter switches states
+#    if (U[iv_hu] == 1) or (U[iv_dhu] == 1):
+#        vui = VDC/2.
 #    if (U[iv_lu] == 1) or (U[iv_dlu] == 1):
 #        vui = -VDC/2.
 #    if (U[iv_hv] == 1) or (U[iv_dhv] == 1):
@@ -263,18 +259,20 @@ def voltages(X, U):
 #    if (U[iv_lw] == 1) or (U[iv_dlw] == 1):
 #        vwi = -VDC/2.
 #
-#    i_thr = 0.001 # current threshold saying that the phase is not conducting
-#    if -i_thr < X[sv_iu] < i_thr:   # phase V & W are conducting current
+#    #i_thr = 0.001 # current threshold saying that the phase is not conducting
+#    i_thr = 0. # current threshold saying that the phase is not conducting
+#    #if -i_thr < X[sv_iu] < i_thr:   # phase V & W are conducting current
+#    if not pux:   # phase V & W are conducting current
 #        vm = ((vvi + vwi) / 2.) - ((ev + ew) / 2.)
 #        vu = eu
 #        vv = vvi - vm
 #        vw = vwi - vm
-#    elif -i_thr < X[sv_iv] < i_thr: # phase U & W are conducting current
+#    elif not pvx: # phase U & W are conducting current
 #        vm = ((vui + vwi) / 2.) - ((eu + ew) / 2.)
 #        vu = vui - vm
 #        vv = ev
 #        vw = vwi - vm
-#    elif -i_thr < X[sv_iw] < i_thr: # phase U & V are conducting current
+#    elif not pwx: # phase U & V are conducting current
 #        vm = ((vui + vvi) / 2.) - ((eu + ev) / 2.)
 #        vu = vui - vm
 #        vv = vvi - vm
@@ -285,6 +283,7 @@ def voltages(X, U):
 #        vu = vui - vm
 #        vv = vvi - vm
 #        vw = vwi - vm
+
 
 #    print "{} : {} {} {}".format(X[sv_omega], vu, vv, vw )
 
