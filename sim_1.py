@@ -33,18 +33,23 @@ def display_state_and_command(time, X, U):
         plt.plot(time, U[:,i], 'r', linewidth=3.0)
         plt.title(titles_cmd[i])
 
+def print_simulation_progress(count, steps):
+        sim_perc_last = ((count-1)*100) / steps
+        sim_perc = (count*100) / steps
+        if (sim_perc_last != sim_perc):
+            print "{}%".format(sim_perc)
 
 def main():
 #    t_psim, Y_psim =  mio.read_csv('bldc_startup_psim_1us_resolution.csv')
 #    mp.plot_output(t_psim, Y_psim, '.')
 
-    freq_sim = 1e5
-    time = pl.arange(0.0, 0.00016, 1./freq_sim)
-    X = np.zeros((time.size, dm.sv_size))
-    Xdebug = np.zeros((time.size, dm.dv_size))
-    Y = np.zeros((time.size, dm.ov_size))
-    U = np.zeros((time.size, dm.iv_size))
-    X0 = [0, mu.rad_of_deg(0.1), 0, 0, 0]
+    freq_sim = 1e5                              # simulation frequency
+    time = pl.arange(0.0, 0.00016, 1./freq_sim) # create time slice vector
+    X = np.zeros((time.size, dm.sv_size))       # allocate state vector
+    Xdebug = np.zeros((time.size, dm.dv_size))  # allocate debug data vector
+    Y = np.zeros((time.size, dm.ov_size))       # allocate output vector
+    U = np.zeros((time.size, dm.iv_size))       # allocate input vector
+    X0 = [0, mu.rad_of_deg(0.1), 0, 0, 0]       #
     X[0,:] = X0
     W = [0]
     for i in range(1,time.size):
@@ -58,9 +63,8 @@ def main():
         X[i,:] = tmp[1,:]
         X[i, dm.sv_theta] = mu.norm_angle( X[i, dm.sv_theta])
         tmp, Xdebug[i,:] = dm.dyn_debug(X[i-1,:], time[i-1], U[i-1,:], W)
-        sim_perc = (((i*1.) / (time.size * 1.) * 100))
-        if (sim_perc % 1) == 0:
-            print "{}%".format(sim_perc)
+        print_simulation_progress(i, time.size)
+
     Y[-1,:] = Y[-2,:]
     U[-1,:] = U[-2,:]
 
