@@ -49,7 +49,7 @@ def main():
     W = [0]
     for i in range(1,time.size):
         if i==1:
-            Uim2 = [0,0,0,0,0,0]
+            Uim2 = [0,0,0,0,0,0,0,0,0,0,0,0]
         else:
             Uim2 = Y[i-2,:]
         Y[i-1,:] = dm.output(X[i-1,:], U[i-2,:])

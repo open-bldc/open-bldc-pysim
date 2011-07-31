@@ -39,7 +39,13 @@ iv_lv   = 2
 iv_hv   = 3
 iv_lw   = 4
 iv_hw   = 5
-iv_size = 6
+iv_dhu  = 6
+iv_dlu  = 7
+iv_dhv  = 8
+iv_dlv  = 9
+iv_dhw  = 10
+iv_dlw  = 11
+iv_size = 12
 
 
 # Components of the perturbation vector
@@ -74,6 +80,20 @@ dv_ph_W = 5
 dv_ph_star = 6
 dv_size = 7
 
+# All diodes conduction vector
+adc_uh = 0
+adc_ul = 1
+adc_vh = 2
+adc_vl = 3
+adc_wh = 4
+adc_wl = 5
+adc_size = 6
+
+# Diode conduction vector
+dc_h = 0
+dc_l = 1
+dc_size = 2
+
 #
 # Calculate backemf at a given omega offset from the current rotor position
 #
@@ -100,6 +120,44 @@ def backemf(X,thetae_offset):
         print "ERROR: angle out of bounds can not calculate bemf {}".format(phase_thetae)
 
     return bemf
+
+def diode(h, l, iu, eu, star):
+    dh = 0
+    dl = 0
+
+    if ((h == 0) and (l == 0)):
+        if (iu < 0) or ((eu + star) > ((VDC/2) + dvf)):
+            dh = 1
+            dl = 0
+        elif (iu > 0) or ((eu + star) < ((-(VDC/2) - dvf))):
+            h = 0
+            l = 1
+        else:
+            h = 0
+            l = 0
+    else:
+        h = 0
+        l = 0
+
+    D = [dh, dl]
+
+    return D
+
+def diodes(X, Xdebug, U):
+
+    DU = diode(U[iv_hu], U[iv_lu], X[sv_iu], Xdebug[dv_eu], Xdebug[dv_ph_star])
+    DV = diode(U[iv_hv], U[iv_lv], X[sv_iv], Xdebug[dv_ev], Xdebug[dv_ph_star])
+    DW = diode(U[iv_hw], U[iv_lw], X[sv_iw], Xdebug[dv_ew], Xdebug[dv_ph_star])
+
+    Ds = [DU[dc_h],
+          DU[dc_l],
+          DV[dc_h],
+          DV[dc_l],
+          DW[dc_h],
+          DW[dc_l]
+          ]
+
+    return Ds
 
 #
 # Calculate phase voltages
