@@ -9,16 +9,18 @@ if 0:
     Damping = 0.001  # aka. 'B' in Nm/(rad/s)
     Kv = 1700.       # aka. motor constant in RPM/V
     L = 0.00312      # aka. Coil inductance in H
+    M = 0.0          # aka. Mutual inductance in H
     R = 0.8          # aka. Phase resistence in Ohm
     VDC = 100.       # aka. Supply voltage
     NbPoles = 14.    # NbPoles / 2 = Number of pole pairs (you count the permanent magnets on the rotor to get NbPoles)
     dvf = .7         # aka. freewheeling diode forward voltage
 else: #psim
-    Inertia = 0.000006            # aka. 'J' in kg/(m^2)
+    Inertia = 0.000007            # aka. 'J' in kg/(m^2)
     tau_shaft = 0.006
     Damping = Inertia/tau_shaft   # aka. 'B' in Nm/(rad/s)
     Kv = 1./32.3*1000             # aka. motor constant in RPM/V
     L = 0.00207                   # aka. Coil inductance in H
+    M = -0.00069                  # aka. Mutual inductance in H
     R = 11.9                      # aka. Phase resistence in Ohm
     VDC = 300.                    # aka. Supply voltage
     NbPoles = 4.                  #
@@ -192,50 +194,97 @@ def voltages(X, U):
 
     if pux and pvx and pwx:
         print "all phases are conducting!"
-        if (U[iv_hu] == 1) or (U[iv_dhu] == 1):
+
+        if (U[iv_hu] == 1):
             vu = VDC/2
+        elif (U[iv_dhu] == 1):
+            vu = VDC/2 + dvf
+        elif (U[iv_dlu] == 1):
+            vu = -(VDC/2 + dvf)
         else:
             vu = -VDC/2
-        if (U[iv_hv] == 1) or (U[iv_dhv] == 1):
+
+        if (U[iv_hv] == 1):
             vv = VDC/2
+        elif (U[iv_dhv] == 1):
+            vv = VDC/2 + dvf
+        elif (U[iv_dlv] == 1):
+            vv = -(VDC/2 + dvf)
         else:
             vv = -VDC/2
-        if (U[iv_hw] == 1) or (U[iv_dhw] == 1):
+
+        if (U[iv_hw] == 1):
             vw = VDC/2
+        elif (U[iv_dhw] == 1):
+            vw = VDC/2 + dvf
+        elif (U[iv_dlw] == 1):
+            vw = -(VDC/2 + dvf)
         else:
             vw = -VDC/2
+
         vm = (vu + vv + vw - eu - ev - ew) / 3.
+
     elif pux and pvx:
-        if (U[iv_hu] == 1) or (U[iv_dhu] == 1):
+        if (U[iv_hu] == 1):
             vu = VDC/2
+        elif (U[iv_dhu] == 1):
+            vu = VDC/2 + dvf
+        elif (U[iv_dlu] == 1):
+            vu = -(VDC/2 + dvf)
         else:
             vu = -VDC/2
-        if (U[iv_hv] == 1) or (U[iv_dhv] == 1):
+
+        if (U[iv_hv] == 1):
             vv = VDC/2
+        elif (U[iv_dhv] == 1):
+            vv = VDC/2 + dvf
+        elif (U[iv_dlv] == 1):
+            vv = -(VDC/2 + dvf)
         else:
             vv = -VDC/2
+
         vm = (vu + vv - eu - ev) / 2.
         vw = ew + vm
     elif pux and pwx:
-        if (U[iv_hu] == 1) or (U[iv_dhu] == 1):
+        if (U[iv_hu] == 1):
             vu = VDC/2
+        elif (U[iv_dhu] == 1):
+            vu = VDC/2 + dvf
+        elif (U[iv_dlu] == 1):
+            vu = -(VDC/2 + dvf)
         else:
             vu = -VDC/2
-        if (U[iv_hw] == 1) or (U[iv_dhw] == 1):
+
+        if (U[iv_hw] == 1):
             vw = VDC/2
+        elif (U[iv_dhw] == 1):
+            vw = VDC/2 + dvf
+        elif (U[iv_dlw] == 1):
+            vw = -(VDC/2 + dvf)
         else:
             vw = -VDC/2
+
         vm = (vu + vw - eu - ew) / 2.
         vv = ev + vm
     elif pvx and pwx:
-        if (U[iv_hv] == 1) or (U[iv_dhv] == 1):
+        if (U[iv_hv] == 1):
             vv = VDC/2
+        elif (U[iv_dhv] == 1):
+            vv = VDC/2 + dvf
+        elif (U[iv_dlv] == 1):
+            vv = -(VDC/2 + dvf)
         else:
             vv = -VDC/2
-        if (U[iv_hw] == 1) or (U[iv_dhw] == 1):
+
+        if (U[iv_hw] == 1):
             vw = VDC/2
+        elif (U[iv_dhw] == 1):
+            vw = VDC/2 + dvf
+        elif (U[iv_dlw] == 1):
+            vw = -(VDC/2 + dvf)
         else:
             vw = -VDC/2
+
         vm = (vv + vw - ev - ew) / 2.
         vu = eu + vm
 
@@ -323,9 +372,9 @@ def dyn_debug(X, t, U, W):
 
     pdt = VDC/2 + dvf
 
-    iu_dot = (V[ph_U] - (R * X[sv_iu]) - eu - V[ph_star]) / L
-    iv_dot = (V[ph_V] - (R * X[sv_iv]) - ev - V[ph_star]) / L
-    iw_dot = (V[ph_W] - (R * X[sv_iw]) - ew - V[ph_star]) / L
+    iu_dot = (V[ph_U] - (R * X[sv_iu]) - eu - V[ph_star]) / (L - M)
+    iv_dot = (V[ph_V] - (R * X[sv_iv]) - ev - V[ph_star]) / (L - M)
+    iw_dot = (V[ph_W] - (R * X[sv_iw]) - ew - V[ph_star]) / (L - M)
 
     Xd = [  X[sv_omega],
             omega_dot,
