@@ -20,8 +20,9 @@ else: #psim
     L = 0.00207                   # aka. Coil inductance in H
     R = 11.9                      # aka. Phase resistence in Ohm
     VDC = 300.                    # aka. Supply voltage
-    NbPoles = 4.                  # 
-    
+    NbPoles = 4.                  #
+    dvf = .7                      # aka. freewheeling diode forward voltage
+
 # Components of the state vector
 sv_theta  = 0      # angle of the rotor
 sv_omega = 1       # angular speed of the rotor
@@ -63,6 +64,16 @@ ph_W = 2
 ph_star = 3
 ph_size = 4
 
+# Debug vector components
+dv_eu = 0
+dv_ev = 1
+dv_ew = 2
+dv_ph_U = 3
+dv_ph_V = 4
+dv_ph_W = 5
+dv_ph_star = 6
+dv_size = 7
+
 #
 # Calculate backemf at a given omega offset from the current rotor position
 #
@@ -99,8 +110,6 @@ def voltages(X, U):
     ev = backemf(X, math.pi * (2./3.))
     ew = backemf(X, math.pi * (4./3.))
 
-    
-    
     # Initialize the imposed terminal voltages
     vui = 0.
     vvi = 0.
@@ -120,33 +129,25 @@ def voltages(X, U):
     if U[iv_lw] == 1:
         vwi = -VDC/2.
 
-    # Mean voltage in the motor, assuming star configuration
-    vtotal = ((vui + vvi + vwi) - (eu + ev + ew))
-    vm = 0.
-
-#    if math.fabs(X[sv_iu]) < 0.001:   # phase V & W are conducting current
-    if  -0.005 < X[sv_iu] < 0.005:   # phase V & W are conducting current
-#    if X[sv_iu] == 0:   # phase V & W are conducting current
-        print "X[sv_iu] == 0 {}".format(X[sv_iu])
-        vm = vtotal / 2.
+    i_thr = 0.001 # current threshold saying that the phase is not conducting
+    if -i_thr < X[sv_iu] < i_thr:   # phase V & W are conducting current
+        vm = ((vvi + vwi) / 2.) - ((ev + ew) / 2.)
         vu = eu
         vv = vvi - vm
         vw = vwi - vm
-#        vv = VDC/2. - eu/2.
-#        vw = -VDC/2. + eu/2.
-    elif X[sv_iv] == 0: # phase U & W are conducting current
-        vm = vtotal / 2.
+    elif -i_thr < X[sv_iv] < i_thr: # phase U & W are conducting current
+        vm = ((vui + vwi) / 2.) - ((eu + ew) / 2.)
         vu = vui - vm
         vv = ev
         vw = vwi - vm
-    elif X[sv_iw] == 0: # phase U & V are conducting current
-        vm = vtotal / 2.
+    elif -i_thr < X[sv_iw] < i_thr: # phase U & V are conducting current
+        vm = ((vui + vvi) / 2.) - ((eu + ev) / 2.)
         vu = vui - vm
         vv = vvi - vm
         vw = ew
     else:               # all phases are corducting current
-        print "none == 0"
-        vm = vtotal / 3.
+        print "all phases are conducting!"
+        vm = ((vui + vvi + vwi) / 3.) - ((eu + ev + ew) / 3.)
         vu = vui - vm
         vv = vvi - vm
         vw = vwi - vm
@@ -167,6 +168,14 @@ def voltages(X, U):
 # X state, t time, U input, W perturbation
 #
 def dyn(X, t, U, W):
+    Xd, Xdebug = dyn_debug(X, t, U, W)
+
+    return Xd
+
+# Dynamic model with debug vector
+def dyn_debug(X, t, U, W):
+
+    ik = -.0001 # decaying current when the diode is not conducting
 
     eu = backemf(X, 0.)
     ev = backemf(X, math.pi * (2./3.))
@@ -176,9 +185,12 @@ def dyn(X, t, U, W):
     etorque = (eu * X[sv_iu] + ev * X[sv_iv] + ew * X[sv_iw])/X[sv_omega]
 
     # Acceleration of the rotor
+    #omega_dot = ((etorque * (NbPoles / 2)) - (Damping * X[sv_omega]) - W[pv_torque]) / Inertia
     omega_dot = ((etorque * (NbPoles / 2)) - (Damping * X[sv_omega]) - W[pv_torque]) / Inertia
 
     V = voltages(X, U)
+
+    pdt = VDC/2 + dvf
 
     iu_dot = (1./L) * (V[ph_U] - (R * X[sv_iu]) - eu - V[ph_star])
     iv_dot = (1./L) * (V[ph_V] - (R * X[sv_iv]) - ev - V[ph_star])
@@ -191,7 +203,17 @@ def dyn(X, t, U, W):
             iw_dot
         ]
 
-    return Xd
+    Xdebug = [
+        eu,
+        ev,
+        ew,
+        V[ph_U],
+        V[ph_V],
+        V[ph_W],
+        V[ph_star]
+        ]
+
+    return Xd, Xdebug
 
 
 #
