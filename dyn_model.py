@@ -12,6 +12,7 @@ if 0:
     R = 0.8          # aka. Phase resistence in Ohm
     VDC = 100.       # aka. Supply voltage
     NbPoles = 14.    # NbPoles / 2 = Number of pole pairs (you count the permanent magnets on the rotor to get NbPoles)
+    dvf = .7         # aka. freewheeling diode forward voltage
 else: #psim
     Inertia = 0.000006            # aka. 'J' in kg/(m^2)
     tau_shaft = 0.006
@@ -102,7 +103,7 @@ dc_size = 2
 def backemf(X,thetae_offset):
     phase_thetae = mu.norm_angle((X[sv_theta] * (NbPoles / 2.)) + thetae_offset)
 
-    bemf_constant = (Kv * math.pi)/30. # aka. ke in V/rad/s
+    bemf_constant = mu.vpradps_of_rpmpv(Kv) # aka. ke in V/rad/s
     max_bemf = bemf_constant * X[sv_omega]
 
     bemf = 0.
@@ -308,8 +309,6 @@ def dyn(X, t, U, W):
 # Dynamic model with debug vector
 def dyn_debug(X, t, U, W):
 
-    ik = -.0001 # decaying current when the diode is not conducting
-
     eu = backemf(X, 0.)
     ev = backemf(X, math.pi * (2./3.))
     ew = backemf(X, math.pi * (4./3.))
@@ -325,9 +324,9 @@ def dyn_debug(X, t, U, W):
 
     pdt = VDC/2 + dvf
 
-    iu_dot = (1./L) * (V[ph_U] - (R * X[sv_iu]) - eu - V[ph_star])
-    iv_dot = (1./L) * (V[ph_V] - (R * X[sv_iv]) - ev - V[ph_star])
-    iw_dot = (1./L) * (V[ph_W] - (R * X[sv_iw]) - ew - V[ph_star])
+    iu_dot = (V[ph_U] - (R * X[sv_iu]) - eu - V[ph_star]) / L
+    iv_dot = (V[ph_V] - (R * X[sv_iv]) - ev - V[ph_star]) / L
+    iw_dot = (V[ph_W] - (R * X[sv_iw]) - ew - V[ph_star]) / L
 
     Xd = [  X[sv_omega],
             omega_dot,

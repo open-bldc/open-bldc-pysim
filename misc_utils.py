@@ -12,6 +12,8 @@ def rpm_of_radps(rps): return rps/(2*math.pi)*60
 #
 def radps_of_rpm(rpm): return rpm*(2*math.pi)/60
 
+#
+def vpradps_of_rpmpv(vprpm): return 30/(vprpm*math.pi)
 
 #
 def norm_angle(alpha):
