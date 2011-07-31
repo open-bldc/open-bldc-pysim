@@ -121,15 +121,15 @@ def backemf(X,thetae_offset):
 
     return bemf
 
-def diode(h, l, iu, eu, star):
+def diode(h, l, i, e, star):
     dh = 0
     dl = 0
 
     if ((h == 0) and (l == 0)):
-        if (iu < 0) or ((eu + star) > ((VDC/2) + dvf)):
+        if (i < 0) or ((e + star) > ((VDC/2) + dvf)):
             dh = 1
             dl = 0
-        elif (iu > 0) or ((eu + star) < ((-(VDC/2) - dvf))):
+        elif (i > 0) or ((e + star) < ((-(VDC/2) - dvf))):
             h = 0
             l = 1
         else:
@@ -168,47 +168,122 @@ def voltages(X, U):
     ev = backemf(X, math.pi * (2./3.))
     ew = backemf(X, math.pi * (4./3.))
 
+    # Check which phases are excited
+    pux = (U[iv_hu] == 1) or \
+        (U[iv_lu] == 1) or \
+        (U[iv_dlu] == 1) or \
+        (U[iv_dhu] == 1)
+
+    pvx = (U[iv_hv] == 1) or \
+        (U[iv_lv] == 1) or \
+        (U[iv_dlv] == 1) or \
+        (U[iv_dhv] == 1)
+
+    pwx = (U[iv_hw] == 1) or \
+        (U[iv_lw] == 1) or \
+        (U[iv_dlw] == 1) or \
+        (U[iv_dhw] == 1)
+
+    vu = 0.
+    vv = 0.
+    vw = 0.
+    vm = 0.
+
+    if pux and pvx and pwx:
+        print "all phases are conducting!"
+        if (U[iv_hu] == 1) or (U[iv_dhu] == 1):
+            vu = VDC/2
+        else:
+            vu = -VDC/2
+        if (U[iv_hv] == 1) or (U[iv_dhv] == 1):
+            vv = VDC/2
+        else:
+            vv = -VDC/2
+        if (U[iv_hw] == 1) or (U[iv_dhw] == 1):
+            vw = VDC/2
+        else:
+            vw = -VDC/2
+        vm = (vu + vv + vw - eu - ev - ew) / 3.
+    elif pux and pvx:
+        if (U[iv_hu] == 1) or (U[iv_dhu] == 1):
+            vu = VDC/2
+        else:
+            vu = -VDC/2
+        if (U[iv_hv] == 1) or (U[iv_dhv] == 1):
+            vv = VDC/2
+        else:
+            vv = -VDC/2
+        vm = (vu + vv - eu - ev) / 2.
+        vw = ew + vm
+    elif pux and pwx:
+        if (U[iv_hu] == 1) or (U[iv_dhu] == 1):
+            vu = VDC/2
+        else:
+            vu = -VDC/2
+        if (U[iv_hw] == 1) or (U[iv_dhw] == 1):
+            vw = VDC/2
+        else:
+            vw = -VDC/2
+        vm = (vu + vw - eu - ew) / 2.
+        vv = ev + vm
+    elif pvx and pwx:
+        if (U[iv_hv] == 1) or (U[iv_dhv] == 1):
+            vv = VDC/2
+        else:
+            vv = -VDC/2
+        if (U[iv_hw] == 1) or (U[iv_dhw] == 1):
+            vw = VDC/2
+        else:
+            vw = -VDC/2
+        vm = (vv + vw - ev - ew) / 2.
+        vu = eu + vm
+
     # Initialize the imposed terminal voltages
-    vui = 0.
-    vvi = 0.
-    vwi = 0.
+#    vui = 0.
+#    vvi = 0.
+#    vwi = 0.
 
     # Phase input voltages based on the inverter switches states
-    if U[iv_hu] == 1:
-        vui = VDC/2.
-    if U[iv_lu] == 1:
-        vui = -VDC/2.
-    if U[iv_hv] == 1:
-        vvi = VDC/2.
-    if U[iv_lv] == 1:
-        vvi = -VDC/2.
-    if U[iv_hw] == 1:
-        vwi = VDC/2.
-    if U[iv_lw] == 1:
-        vwi = -VDC/2.
-
-    i_thr = 0.001 # current threshold saying that the phase is not conducting
-    if -i_thr < X[sv_iu] < i_thr:   # phase V & W are conducting current
-        vm = ((vvi + vwi) / 2.) - ((ev + ew) / 2.)
-        vu = eu
-        vv = vvi - vm
-        vw = vwi - vm
-    elif -i_thr < X[sv_iv] < i_thr: # phase U & W are conducting current
-        vm = ((vui + vwi) / 2.) - ((eu + ew) / 2.)
-        vu = vui - vm
-        vv = ev
-        vw = vwi - vm
-    elif -i_thr < X[sv_iw] < i_thr: # phase U & V are conducting current
-        vm = ((vui + vvi) / 2.) - ((eu + ev) / 2.)
-        vu = vui - vm
-        vv = vvi - vm
-        vw = ew
-    else:               # all phases are corducting current
-        print "all phases are conducting!"
-        vm = ((vui + vvi + vwi) / 3.) - ((eu + ev + ew) / 3.)
-        vu = vui - vm
-        vv = vvi - vm
-        vw = vwi - vm
+#    if pux:
+#        if (U[iv_hv] == 1) or (U[iv_dhv] == 1):
+#            vui = VDC/2.
+#        else:
+#            vui = -VDC/2.
+#    else:
+#        vui = ev
+#    if (U[iv_lu] == 1) or (U[iv_dlu] == 1):
+#        vui = -VDC/2.
+#    if (U[iv_hv] == 1) or (U[iv_dhv] == 1):
+#        vvi = VDC/2.
+#    if (U[iv_lv] == 1) or (U[iv_dlv] == 1):
+#        vvi = -VDC/2.
+#    if (U[iv_hw] == 1) or (U[iv_dhw] == 1):
+#        vwi = VDC/2.
+#    if (U[iv_lw] == 1) or (U[iv_dlw] == 1):
+#        vwi = -VDC/2.
+#
+#    i_thr = 0.001 # current threshold saying that the phase is not conducting
+#    if -i_thr < X[sv_iu] < i_thr:   # phase V & W are conducting current
+#        vm = ((vvi + vwi) / 2.) - ((ev + ew) / 2.)
+#        vu = eu
+#        vv = vvi - vm
+#        vw = vwi - vm
+#    elif -i_thr < X[sv_iv] < i_thr: # phase U & W are conducting current
+#        vm = ((vui + vwi) / 2.) - ((eu + ew) / 2.)
+#        vu = vui - vm
+#        vv = ev
+#        vw = vwi - vm
+#    elif -i_thr < X[sv_iw] < i_thr: # phase U & V are conducting current
+#        vm = ((vui + vvi) / 2.) - ((eu + ev) / 2.)
+#        vu = vui - vm
+#        vv = vvi - vm
+#        vw = ew
+#    else:               # all phases are corducting current
+#        print "all phases are conducting!"
+#        vm = ((vui + vvi + vwi) / 3.) - ((eu + ev + ew) / 3.)
+#        vu = vui - vm
+#        vv = vvi - vm
+#        vw = vwi - vm
 
 #    print "{} : {} {} {}".format(X[sv_omega], vu, vv, vw )
 

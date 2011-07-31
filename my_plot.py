@@ -9,7 +9,7 @@ ang_unit_deg_s = 1
 ang_unit_rpm = 2
 
 def plot_output(time, Y, ls):
-    ang_unit = ang_unit_rad_s
+    ang_unit = ang_unit_deg_s
 
     plt.subplot(4, 1, 1)
 
@@ -65,3 +65,11 @@ def plot_debug(time, Xdebug):
     plt.plot(time,Xdebug[:,dm.dv_ph_star], linewidth=1.5)
     plt.legend(['$star$'], loc='upper right')
 
+def plot_diodes(time, D):
+
+    titles_diodes = ['$dhu$', '$dlu$', '$dhv$', '$dlv$', '$dhw$', '$dlw$']
+
+    for i in range(0, dm.adc_size):
+        plt.subplot(6, 2, 2*i+1)
+        plt.plot(time,D[:,i], 'r', linewidth=1.5)
+        plt.title(titles_diodes[i])

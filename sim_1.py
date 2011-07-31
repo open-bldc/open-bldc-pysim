@@ -39,12 +39,26 @@ def print_simulation_progress(count, steps):
         if (sim_perc_last != sim_perc):
             print "{}%".format(sim_perc)
 
+def copy_diodes(U, D):
+    Uout = np.zeros(dm.iv_size)
+
+    Uout[:] = U[:]
+
+    Uout[dm.iv_dhu] = D[dm.adc_uh]
+    Uout[dm.iv_dlu] = D[dm.adc_ul]
+    Uout[dm.iv_dhv] = D[dm.adc_vh]
+    Uout[dm.iv_dlv] = D[dm.adc_vl]
+    Uout[dm.iv_dhw] = D[dm.adc_wh]
+    Uout[dm.iv_dlw] = D[dm.adc_wl]
+
+    return Uout
+
 def main():
 #    t_psim, Y_psim =  mio.read_csv('bldc_startup_psim_1us_resolution.csv')
 #    mp.plot_output(t_psim, Y_psim, '.')
 
     freq_sim = 1e5                              # simulation frequency
-    time = pl.arange(0.0, 0.00016, 1./freq_sim) # create time slice vector
+    time = pl.arange(0.0, 0.072, 1./freq_sim) # create time slice vector
     X = np.zeros((time.size, dm.sv_size))       # allocate state vector
     Xdebug = np.zeros((time.size, dm.dv_size))  # allocate debug data vector
     Y = np.zeros((time.size, dm.ov_size))       # allocate output vector
@@ -52,17 +66,22 @@ def main():
     X0 = [0, mu.rad_of_deg(0.1), 0, 0, 0]       #
     X[0,:] = X0
     W = [0]
+    D = np.zeros((time.size, dm.adc_size))      # allocate diode conduction vector
     for i in range(1,time.size):
+
         if i==1:
-            Uim2 = [0,0,0,0,0,0,0,0,0,0,0,0]
+            Uim2 = np.zeros(dm.iv_size)
         else:
-            Uim2 = Y[i-2,:]
-        Y[i-1,:] = dm.output(X[i-1,:], U[i-2,:])
-        U[i-1,:] = ctl.run(0, Y[i-1,:], time[i-1])
-        tmp = integrate.odeint(dm.dyn, X[i-1,:], [time[i-1], time[i]], args=(U[i-1,:], W))
-        X[i,:] = tmp[1,:]
-        X[i, dm.sv_theta] = mu.norm_angle( X[i, dm.sv_theta])
-        tmp, Xdebug[i,:] = dm.dyn_debug(X[i-1,:], time[i-1], U[i-1,:], W)
+            Uim2 = U[i-2,:]
+
+        Y[i-1,:] = dm.output(X[i-1,:], Uim2)                  # get the output for the last step
+        U[i-1,:] = ctl.run(0, Y[i-1,:], time[i-1])            # run the controller for the last step
+        D[i-1,:] = dm.diodes(X[i-1,:], Xdebug[i-1], U[i-1,:]) # calculate the diode states based on the last step
+        U[i-1,:] = copy_diodes(U[i-1,:], D[i-1,:])            # copy diode conduction states to the input vector
+        tmp = integrate.odeint(dm.dyn, X[i-1,:], [time[i-1], time[i]], args=(U[i-1,:], W)) # integrate
+        X[i,:] = tmp[1,:] # copy integration output to the current step
+        X[i, dm.sv_theta] = mu.norm_angle( X[i, dm.sv_theta]) # normalize the angle in the state
+        tmp, Xdebug[i,:] = dm.dyn_debug(X[i-1,:], time[i-1], U[i-1,:], W) # get debug data
         print_simulation_progress(i, time.size)
 
     Y[-1,:] = Y[-2,:]
@@ -76,6 +95,9 @@ def main():
 
     plt.figure(figsize=(10.24, 5.12))
     mp.plot_debug(time, Xdebug)
+
+    plt.figure(figsize=(10.24, 5.12))
+    mp.plot_diodes(time, D)
 
     pl.show()
 
