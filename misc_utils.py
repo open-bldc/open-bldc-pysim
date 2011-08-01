@@ -1,5 +1,5 @@
 #
-# Open-BLDC - Open BrushLess DC Motor Controller
+# Open-BLDC pysim - Open BrushLess DC Motor Controller python simulator
 # Copyright (C) 2011 by Antoine Drouin <poinix@gmail.com>
 # Copyright (C) 2011 by Piotr Esden-Tempski <piotr@esden.net>
 #
