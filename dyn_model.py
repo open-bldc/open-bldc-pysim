@@ -4,7 +4,7 @@ import math
 import misc_utils as mu
 
 # parameters
-pset = 2
+pset = 3
 
 if pset == 0:
     Inertia = 0.0022 # aka. 'J' in kg/(m^2)
@@ -36,7 +36,18 @@ elif pset == 2: #psim
     R = 11.9                      # aka. Phase resistence in Ohm
     VDC = 300.                    # aka. Supply voltage
     NbPoles = 4.                  #
-    dvf = .7                      # aka. freewheeling diode forward voltage
+    dvf = .0                      # aka. freewheeling diode forward voltage
+elif pset == 3: #modified psim
+    Inertia = 0.000059            # aka. 'J' in kg/(m^2)
+    tau_shaft = 0.006
+    Damping = Inertia/tau_shaft   # aka. 'B' in Nm/(rad/s)
+    Kv = 1./32.3*1000             # aka. motor constant in RPM/V
+    L = 0.00207                   # aka. Coil inductance in H
+    M = -0.00069                  # aka. Mutual inductance in H
+    R = 11.9                      # aka. Phase resistence in Ohm
+    VDC = 300.                    # aka. Supply voltage
+    NbPoles = 4.                  #
+    dvf = .0                      # aka. freewheeling diode forward voltage
 else:
     print "Unknown pset {}".format(pset)
 
@@ -143,18 +154,18 @@ def diode(h, l, i, e, star):
     dl = 0
 
     if ((h == 0) and (l == 0)):
-        if (i < 0) or ((e + star) > ((VDC/2) + dvf)):
+        if (i < -0.01) or ((e + star) > ((VDC/2) + dvf)):
             dh = 1
             dl = 0
-        elif (i > 0) or ((e + star) < ((-(VDC/2) - dvf))):
-            h = 0
-            l = 1
+        elif (i > 0.01) or ((e + star) < ((-(VDC/2) - dvf))):
+            dh = 0
+            dl = 1
         else:
-            h = 0
-            l = 0
+            dh = 0
+            dl = 0
     else:
-        h = 0
-        l = 0
+        dh = 0
+        dl = 0
 
     D = [dh, dl]
 
@@ -379,7 +390,6 @@ def dyn_debug(X, t, U, W):
     etorque = (eu * X[sv_iu] + ev * X[sv_iv] + ew * X[sv_iw])/X[sv_omega]
 
     # Acceleration of the rotor
-    #omega_dot = ((etorque * (NbPoles / 2)) - (Damping * X[sv_omega]) - W[pv_torque]) / Inertia
     omega_dot = ((etorque * (NbPoles / 2)) - (Damping * X[sv_omega]) - W[pv_torque]) / Inertia
 
     V = voltages(X, U)
