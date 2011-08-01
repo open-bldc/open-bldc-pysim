@@ -4,7 +4,9 @@ import math
 import misc_utils as mu
 
 # parameters
-if 0:
+pset = 2
+
+if pset == 0:
     Inertia = 0.0022 # aka. 'J' in kg/(m^2)
     Damping = 0.001  # aka. 'B' in Nm/(rad/s)
     Kv = 1700.       # aka. motor constant in RPM/V
@@ -14,7 +16,17 @@ if 0:
     VDC = 100.       # aka. Supply voltage
     NbPoles = 14.    # NbPoles / 2 = Number of pole pairs (you count the permanent magnets on the rotor to get NbPoles)
     dvf = .7         # aka. freewheeling diode forward voltage
-else: #psim
+elif pset == 1:
+    Inertia = 0.0022 # aka. 'J' in kg/(m^2)
+    Damping = 0.001  # aka. 'B' in Nm/(rad/s)
+    Kv = 70.         # aka. motor constant in RPM/V
+    L = 0.00521      # aka. Coil inductance in H
+    M = 0.0          # aka. Mutual inductance in H
+    R = 0.7          # aka. Phase resistence in Ohm
+    VDC = 100.       # aka. Supply voltage
+    NbPoles = 4.    # NbPoles / 2 = Number of pole pairs (you count the permanent magnets on the rotor to get NbPoles)
+    dvf = .7         # aka. freewheeling diode forward voltage
+elif pset == 2: #psim
     Inertia = 0.000007            # aka. 'J' in kg/(m^2)
     tau_shaft = 0.006
     Damping = Inertia/tau_shaft   # aka. 'B' in Nm/(rad/s)
@@ -25,6 +37,8 @@ else: #psim
     VDC = 300.                    # aka. Supply voltage
     NbPoles = 4.                  #
     dvf = .7                      # aka. freewheeling diode forward voltage
+else:
+    print "Unknown pset {}".format(pset)
 
 # Components of the state vector
 sv_theta  = 0      # angle of the rotor
