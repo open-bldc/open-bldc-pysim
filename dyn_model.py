@@ -207,7 +207,7 @@ def voltages(X, U):
     vm = 0.
 
     if pux and pvx and pwx:
-        print "all phases are conducting!"
+        #print "all phases are conducting!"
 
         if (U[iv_hu] == 1):
             vu = VDC/2
