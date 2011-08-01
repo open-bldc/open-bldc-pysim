@@ -237,59 +237,99 @@ def voltages(X, U):
     vm = 0.
 
     if pux and pvx and pwx:
-        #print "all phases are conducting!"
-
         if (U[iv_hu] == 1):
-            vu = VDC/2
+            vu = VDC/2.
         elif (U[iv_dhu] == 1):
-            vu = VDC/2 + dvf
+            vu = VDC/2. + dvf
         elif (U[iv_dlu] == 1):
-            vu = -(VDC/2 + dvf)
+            vu = -(VDC/2. + dvf)
         else:
-            vu = -VDC/2
+            vu = -VDC/2.
 
         if (U[iv_hv] == 1):
-            vv = VDC/2
+            vv = VDC/2.
         elif (U[iv_dhv] == 1):
-            vv = VDC/2 + dvf
+            vv = VDC/2. + dvf
         elif (U[iv_dlv] == 1):
-            vv = -(VDC/2 + dvf)
+            vv = -(VDC/2. + dvf)
         else:
-            vv = -VDC/2
+            vv = -VDC/2.
 
         if (U[iv_hw] == 1):
-            vw = VDC/2
+            vw = VDC/2.
         elif (U[iv_dhw] == 1):
-            vw = VDC/2 + dvf
+            vw = VDC/2. + dvf
         elif (U[iv_dlw] == 1):
-            vw = -(VDC/2 + dvf)
+            vw = -(VDC/2. + dvf)
         else:
-            vw = -VDC/2
+            vw = -VDC/2.
 
         vm = (vu + vv + vw - eu - ev - ew) / 3.
 
     elif pux and pvx:
         if (U[iv_hu] == 1):
-            vu = VDC/2
+            vu = VDC/2.
         elif (U[iv_dhu] == 1):
-            vu = VDC/2 + dvf
+            vu = VDC/2. + dvf
         elif (U[iv_dlu] == 1):
-            vu = -(VDC/2 + dvf)
+            vu = -(VDC/2. + dvf)
         else:
-            vu = -VDC/2
+            vu = -VDC/2.
 
         if (U[iv_hv] == 1):
-            vv = VDC/2
+            vv = VDC/2.
         elif (U[iv_dhv] == 1):
-            vv = VDC/2 + dvf
+            vv = VDC/2. + dvf
         elif (U[iv_dlv] == 1):
-            vv = -(VDC/2 + dvf)
+            vv = -(VDC/2. + dvf)
         else:
-            vv = -VDC/2
+            vv = -VDC/2.
 
         vm = (vu + vv - eu - ev) / 2.
         vw = ew + vm
     elif pux and pwx:
+        if (U[iv_hu] == 1):
+            vu = VDC/2.
+        elif (U[iv_dhu] == 1):
+            vu = VDC/2. + dvf
+        elif (U[iv_dlu] == 1):
+            vu = -(VDC/2. + dvf)
+        else:
+            vu = -VDC/2.
+
+        if (U[iv_hw] == 1):
+            vw = VDC/2.
+        elif (U[iv_dhw] == 1):
+            vw = VDC/2. + dvf
+        elif (U[iv_dlw] == 1):
+            vw = -(VDC/2. + dvf)
+        else:
+            vw = -VDC/2.
+
+        vm = (vu + vw - eu - ew) / 2.
+        vv = ev + vm
+    elif pvx and pwx:
+        if (U[iv_hv] == 1):
+            vv = VDC/2.
+        elif (U[iv_dhv] == 1):
+            vv = VDC/2. + dvf
+        elif (U[iv_dlv] == 1):
+            vv = -(VDC/2. + dvf)
+        else:
+            vv = -VDC/2.
+
+        if (U[iv_hw] == 1):
+            vw = VDC/2.
+        elif (U[iv_dhw] == 1):
+            vw = VDC/2. + dvf
+        elif (U[iv_dlw] == 1):
+            vw = -(VDC/2. + dvf)
+        else:
+            vw = -VDC/2.
+
+        vm = (vv + vw - ev - ew) / 2.
+        vu = eu + vm
+    elif pux:
         if (U[iv_hu] == 1):
             vu = VDC/2
         elif (U[iv_dhu] == 1):
@@ -297,20 +337,12 @@ def voltages(X, U):
         elif (U[iv_dlu] == 1):
             vu = -(VDC/2 + dvf)
         else:
-            vu = -VDC/2
+            vu = -VDC/2.
 
-        if (U[iv_hw] == 1):
-            vw = VDC/2
-        elif (U[iv_dhw] == 1):
-            vw = VDC/2 + dvf
-        elif (U[iv_dlw] == 1):
-            vw = -(VDC/2 + dvf)
-        else:
-            vw = -VDC/2
-
-        vm = (vu + vw - eu - ew) / 2.
+        vm = (vu - eu)
         vv = ev + vm
-    elif pvx and pwx:
+        vw = ew + vm
+    elif pvx:
         if (U[iv_hv] == 1):
             vv = VDC/2
         elif (U[iv_dhv] == 1):
@@ -318,19 +350,28 @@ def voltages(X, U):
         elif (U[iv_dlv] == 1):
             vv = -(VDC/2 + dvf)
         else:
-            vv = -VDC/2
+            vv = -VDC/2.
 
+        vm = (vv - ev)
+        vu = eu + vm
+        vw = ew + vm
+    elif pwx:
         if (U[iv_hw] == 1):
             vw = VDC/2
         elif (U[iv_dhw] == 1):
             vw = VDC/2 + dvf
-        elif (U[iv_dlw] == 1):
+        elif (U[iv_dlu] == 1):
             vw = -(VDC/2 + dvf)
         else:
-            vw = -VDC/2
+            vw = -VDC/2.
 
-        vm = (vv + vw - ev - ew) / 2.
+        vm = (vw - ew)
         vu = eu + vm
+        vv = ev + vm
+    else:
+        vm = eu
+        vv = ev
+        vw = ew
 
 
 #    # Initialize the imposed terminal voltages
