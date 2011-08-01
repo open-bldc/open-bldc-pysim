@@ -9,26 +9,34 @@ ang_unit_deg_s = 1
 ang_unit_rpm = 2
 
 def plot_output(time, Y, ls):
-    ang_unit = ang_unit_deg_s
+    ang_unit = ang_unit_rpm
 
-    plt.subplot(4, 1, 1)
-
+    # Phase current
+    ax = plt.subplot(4, 1, 1)
+    ax.yaxis.set_label_text('s', {'color'    : 'k', 'fontsize'   : 15 })
     plt.plot(time,Y[:,dm.ov_iu], ls, linewidth=1.5)
     plt.plot(time,Y[:,dm.ov_iv], ls, linewidth=1.5)
     plt.plot(time,Y[:,dm.ov_iw], ls, linewidth=1.5)
     plt.legend(['$i_u$', '$i_v$', '$i_w$'], loc='upper right')
     plt.title('Phase current')
-    plt.subplot(4, 1, 2)
+
+    # Phase terminal voltage
+    ax = plt.subplot(4, 1, 2)
+    ax.yaxis.set_label_text('s', {'color'    : 'k', 'fontsize'   : 15 })
     plt.plot(time,Y[:,dm.ov_vu], ls, linewidth=1.5)
     plt.plot(time,Y[:,dm.ov_vv], ls, linewidth=1.5)
     plt.plot(time,Y[:,dm.ov_vw], ls, linewidth=1.5)
     plt.legend(['$v_u$', '$v_v$', '$v_w$'], loc='upper right')
-    plt.title('Phase voltage')
-    plt.subplot(4, 1, 3)
+    plt.title('Phase terminal voltage')
+
+    # Rotor mechanical position
+    ax = plt.subplot(4, 1, 3)
+    ax.yaxis.set_label_text('Deg', {'color'    : 'k', 'fontsize'   : 15 })
     plt.plot(time,mu.deg_of_rad(Y[:,dm.ov_theta]), ls, linewidth=1.5)
 #    plt.plot(time, Y[:,dm.ov_theta], ls, linewidth=1.5)
-    plt.title('Angular position')
+    plt.title('Rotor angular position')
 
+    # Rotor mechanical angular speed
     ax = plt.subplot(4, 1, 4)
 
     if (ang_unit == ang_unit_rad_s):
@@ -41,9 +49,7 @@ def plot_output(time, Y, ls):
         ax.yaxis.set_label_text('RPM', {'color'    : 'k', 'fontsize'   : 15 })
         plt.plot(time,mu.rpm_of_radps(Y[:,dm.ov_omega]), ls, linewidth=1.5)
 
-#    plt.plot(time,mu.rpm_of_radps(Y[:,dm.ov_omega]), ls, linewidth=1.5)
-#    plt.plot(time, Y[:,dm.ov_omega], ls, linewidth=1.5)
-    plt.title('Rotational Velocity')
+    plt.title('Rotor Rotational Velocity')
 
 def plot_debug(time, Xdebug):
     plt.subplot(4, 1, 1)
