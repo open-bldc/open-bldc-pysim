@@ -13,7 +13,7 @@ def plot_output(time, Y, ls):
 
     # Phase current
     ax = plt.subplot(4, 1, 1)
-    ax.yaxis.set_label_text('s', {'color'    : 'k', 'fontsize'   : 15 })
+    ax.yaxis.set_label_text('A', {'color'    : 'k', 'fontsize'   : 15 })
     plt.plot(time,Y[:,dm.ov_iu], ls, linewidth=1.5)
     plt.plot(time,Y[:,dm.ov_iv], ls, linewidth=1.5)
     plt.plot(time,Y[:,dm.ov_iw], ls, linewidth=1.5)
@@ -22,7 +22,7 @@ def plot_output(time, Y, ls):
 
     # Phase terminal voltage
     ax = plt.subplot(4, 1, 2)
-    ax.yaxis.set_label_text('s', {'color'    : 'k', 'fontsize'   : 15 })
+    ax.yaxis.set_label_text('V', {'color'    : 'k', 'fontsize'   : 15 })
     plt.plot(time,Y[:,dm.ov_vu], ls, linewidth=1.5)
     plt.plot(time,Y[:,dm.ov_vv], ls, linewidth=1.5)
     plt.plot(time,Y[:,dm.ov_vw], ls, linewidth=1.5)
