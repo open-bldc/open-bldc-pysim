@@ -36,10 +36,10 @@ def plot_output(time, Y, ls):
         plt.plot(time,Y[:,dm.ov_omega], ls, linewidth=1.5)
     elif (ang_unit == ang_unit_deg_s):
         ax.yaxis.set_label_text('Deg/s', {'color'    : 'k', 'fontsize'   : 15 })
-        plt.plot(time,mu.deg_of_rad(Y[:,dm.ov_omega]), ls, linewidth=1.5)
+        plt.plot(time,mu.degps_of_radps(Y[:,dm.ov_omega]), ls, linewidth=1.5)
     elif (ang_unit == ang_unit_rpm):
         ax.yaxis.set_label_text('RPM', {'color'    : 'k', 'fontsize'   : 15 })
-        plt.plot(time,mu.rpm_of_rad(Y[:,dm.ov_omega]), ls, linewidth=1.5)
+        plt.plot(time,mu.rpm_of_radps(Y[:,dm.ov_omega]), ls, linewidth=1.5)
 
 #    plt.plot(time,mu.rpm_of_radps(Y[:,dm.ov_omega]), ls, linewidth=1.5)
 #    plt.plot(time, Y[:,dm.ov_omega], ls, linewidth=1.5)

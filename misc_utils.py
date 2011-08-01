@@ -10,6 +10,9 @@ def deg_of_rad(r): return r*180./math.pi
 def rpm_of_radps(rps): return rps/(2*math.pi)*60
 
 #
+def degps_of_radps(rps): return rps/(2*math.pi)*60*360
+
+#
 def radps_of_rpm(rpm): return rpm*(2*math.pi)/60
 
 #
