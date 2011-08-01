@@ -22,3 +22,6 @@ numpy
 scipy
 python 2.6
 
+How to run
+==========
+$ ./sim_1.py
