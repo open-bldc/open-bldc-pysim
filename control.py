@@ -27,7 +27,7 @@ import math
 
 PWM_freq = 200000
 PWM_cycle_time = (1./200000)
-PWM_duty = .75
+PWM_duty = 1.
 PWM_duty_time = PWM_cycle_time * PWM_duty
 
 debug = False
