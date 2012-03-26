@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+
 #
 # Open-BLDC pysim - Open BrushLess DC Motor Controller python simulator
 # Copyright (C) 2011 by Antoine Drouin <poinix@gmail.com>
@@ -19,12 +19,13 @@
 #
 
 import matplotlib
-#matplotlib.use('MacOSX')
+matplotlib.use('MacOSX')
 #matplotlib.use('GTKCairo')
 import numpy as np
 import pylab as pl
 import matplotlib.pyplot as plt
 from scipy import integrate
+from scipy.signal import decimate
 
 import misc_utils as mu
 import dyn_model  as dm
@@ -71,11 +72,23 @@ def copy_diodes(U, D):
 
     return Uout
 
+def drop_it(a, factor):
+	new = []
+	for n, x in enumerate(a):
+		if ((n % factor) == 0):
+			new.append(x)
+	return np.array(new)
+
+def compress(a, factor):
+	return drop_it(a, factor)
+	#return decimate(a, 8, n=8, axis=0)
+
 def main():
 #    t_psim, Y_psim =  mio.read_csv('bldc_startup_psim_1us_resolution.csv')
 #    mp.plot_output(t_psim, Y_psim, '.')
 
-    freq_sim = 1e6                              # simulation frequency
+    freq_sim = 1e5                              # simulation frequency
+    compress_factor = 1
     time = pl.arange(0.0, 0.016, 1./freq_sim) # create time slice vector
     X = np.zeros((time.size, dm.sv_size))       # allocate state vector
     Xdebug = np.zeros((time.size, dm.dv_size))  # allocate debug data vector
@@ -105,6 +118,13 @@ def main():
     Y[-1,:] = Y[-2,:]
     U[-1,:] = U[-2,:]
 
+    if compress_factor > 1:
+        time = compress(time, compress_factor)
+        Y = compress(Y, compress_factor)
+        X = compress(X, compress_factor)
+        U = compress(U, compress_factor)
+        Xdebug = compress(Xdebug, compress_factor)
+        D = compress(D, compress_factor)
 
     mp.plot_output(time, Y, '-')
 #    pl.show()
