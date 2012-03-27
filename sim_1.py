@@ -73,16 +73,16 @@ def main():
 #    t_psim, Y_psim =  mio.read_csv('bldc_startup_psim_1us_resolution.csv')
 #    mp.plot_output(t_psim, Y_psim, '.')
 
-    freq_sim = 1e5                              # simulation frequency
+    freq_sim = 1e6                              # simulation frequency
     compress_factor = 3
-    time = pl.arange(0.0, 0.1, 1./freq_sim) # create time slice vector
+    time = pl.arange(0.0, 0.01, 1./freq_sim) # create time slice vector
     X = np.zeros((time.size, dm.sv_size))       # allocate state vector
     Xdebug = np.zeros((time.size, dm.dv_size))  # allocate debug data vector
     Y = np.zeros((time.size, dm.ov_size))       # allocate output vector
     U = np.zeros((time.size, dm.iv_size))       # allocate input vector
     X0 = [0, mu.rad_of_deg(0.1), 0, 0, 0]       #
     X[0,:] = X0
-    W = [0]
+    W = [0, 1]
     for i in range(1,time.size):
 
         if i==1:

@@ -53,7 +53,7 @@ elif pset == 2: #psim
     L = 0.00207                   # aka. Coil inductance in H
     M = -0.00069                  # aka. Mutual inductance in H
     R = 11.9                      # aka. Phase resistence in Ohm
-    VDC = 300.                    # aka. Supply voltage
+    VDC = 100.                    # aka. Supply voltage
     NbPoles = 4.                  #
     dvf = .0                      # aka. freewheeling diode forward voltage
 elif pset == 3: #modified psim
@@ -91,7 +91,8 @@ iv_size = 6
 
 # Components of the perturbation vector
 pv_torque  = 0
-pv_size = 1
+pv_friction = 1
+pv_size = 2
 
 # Components of the output vector
 ov_iu      = 0
@@ -372,8 +373,20 @@ def dyn_debug(X, t, U, W):
     # Electromagnetic torque
     etorque = (eu * X[sv_iu] + ev * X[sv_iv] + ew * X[sv_iw])/X[sv_omega]
 
+    # Mechanical torque
+    mtorque = ((etorque * (NbPoles / 2)) - (Damping * X[sv_omega]) - W[pv_torque])
+
+    if ((mtorque > 0) and (mtorque <= W[pv_friction])):
+        mtorque = 0
+    elif (mtorque >= W[pv_friction]):
+        mtorque = mtorque - W[pv_friction]
+    elif ((mtorque < 0) and (mtorque >= (-W[pv_friction]))):
+	mtorque = 0
+    elif (mtorque <= (-W[pv_friction])):
+	mtorque = mtorque + W[pv_friction]
+
     # Acceleration of the rotor
-    omega_dot = ((etorque * (NbPoles / 2)) - (Damping * X[sv_omega]) - W[pv_torque]) / Inertia
+    omega_dot = mtorque / Inertia
 
     V = voltages(X, U)
 

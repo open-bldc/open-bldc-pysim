@@ -25,9 +25,9 @@ import misc_utils as mu
 
 import math
 
-PWM_freq = 200000
-PWM_cycle_time = (1./200000)
-PWM_duty = 1.
+PWM_freq = 16000
+PWM_cycle_time = (1./16000)
+PWM_duty = 0.6
 PWM_duty_time = PWM_cycle_time * PWM_duty
 
 debug = False
